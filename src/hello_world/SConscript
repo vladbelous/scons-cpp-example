@@ -1,0 +1,17 @@
+# vim: ft=python
+Import('env')
+Import('Lib')
+
+env.Program(
+    target='my_program',
+    source=[
+        'main.cpp',
+        Lib(':hello_helper'),  # Same SConscript (see below)
+        Lib('/util:util'),     # Different SConscript
+    ],
+)
+
+env.Library(
+    target='hello_helper',
+    source=['HelloHelper.cpp'],
+)

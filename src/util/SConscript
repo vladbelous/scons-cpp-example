@@ -1,0 +1,10 @@
+# vim: ft=python
+Import('env')
+
+env.Library(
+    target='util',
+    source=[
+        'Util1.cpp',
+        'impl/Util2.cpp',
+    ],
+)
