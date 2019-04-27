@@ -2,7 +2,7 @@
 Import('env')
 Import('Lib')
 
-env.Program(
+out = env.Program(
     target='my_program',
     source=[
         'main.cpp',
@@ -15,3 +15,5 @@ env.Library(
     target='hello_helper',
     source=['HelloHelper.cpp'],
 )
+
+Return('out')

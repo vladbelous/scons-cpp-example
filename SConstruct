@@ -6,6 +6,10 @@ env.Append(
         '-std=c++17',
         '-Wall',
         '-Wextra',
+        #'-flto',
+    ],
+    LINKFLAGS = [
+        #'-flto',
     ],
 )
 
@@ -33,9 +37,8 @@ else:
 # Out-of-source build:
 VariantDir(build_dir, 'src')
 
-# All includes are relative to this src_root:
-src_root = Dir(build_dir)
-env.Replace(CPPPATH=[src_root])
+# All includes are relative to this "codebase root":
+env.Replace(CPPPATH=[Dir(build_dir)])  # Better than '#src'
 
 
 # Helper to sanely specify static lib dependencies, e.g.:
@@ -63,7 +66,7 @@ def Lib(path):
         # "Absolute" libary path, i.e. relative to codebase root:
         path = path[2:]
         basedir, lib = path.split(':')
-        return '#{}/{}/lib{}.a'.format(src_root.path, basedir, lib)
+        return '#{}/{}/lib{}.a'.format(build_dir, basedir, lib)
     elif path.startswith(':'):
         # Library defined in same SConscript file (i.e. "local")
         path = path[1:]
@@ -79,4 +82,8 @@ print "+++ Found {} SConscript files".format(len(target_files))
 
 for f in sorted(target_files):
     print "+++    ", f
-    SConscript(f, exports='env')
+    targets = SConscript(f, exports='env')
+
+    # Make only explicitly returned targets part of default
+    if targets is not None and len(targets) > 0:
+        env.Default(targets)
