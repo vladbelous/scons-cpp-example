@@ -51,7 +51,7 @@ env.Replace(CPPPATH=[src_root])
 #       target='my_binary',
 #       sources=[
 #           'main.cpp',
-#           Lib('/common/foo:my_lib'),
+#           Lib('//common/foo:my_lib'),
 #       ],
 #   )
 # 
@@ -59,9 +59,9 @@ env.Replace(CPPPATH=[src_root])
 # which SCons will correctly recognize as output of the corresponding
 # env.Library (i.e. 'my_lib' here) and will add the latter as a dependency.
 def Lib(path):
-    if path.startswith('/'):
+    if path.startswith('//'):
         # "Absolute" libary path, i.e. relative to codebase root:
-        path = path[1:]
+        path = path[2:]
         basedir, lib = path.split(':')
         return '#{}/{}/lib{}.a'.format(src_root.path, basedir, lib)
     elif path.startswith(':'):
@@ -69,7 +69,7 @@ def Lib(path):
         path = path[1:]
         return 'lib{}.a'.format(path)
     else:
-        raise "Library path must be ':foo', or '/foo:bar', '/foo/bar:baz', etc"
+        raise "Library path must be ':foo', or '//foo:bar', '//foo/bar:baz', etc"
 
 Export('Lib')
 

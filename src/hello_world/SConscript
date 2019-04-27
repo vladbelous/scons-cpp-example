@@ -7,7 +7,7 @@ env.Program(
     source=[
         'main.cpp',
         Lib(':hello_helper'),  # Same SConscript (see below)
-        Lib('/util:util'),     # Different SConscript
+        Lib('//util:util'),    # Different SConscript
     ],
 )
 
