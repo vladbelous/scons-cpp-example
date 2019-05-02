@@ -76,12 +76,25 @@ else:
 
 build_dir = 'build/' + env['mode']
 
+
+# Create in-source clang-tidy phony target, invoked as:
+# `scons clang-tidy`
+env.AlwaysBuild(env.Alias(
+    target='clang-tidy',
+    sources=[],
+    action="clang-tidy "
+        "-header-filter=.* "
+        "-checks=-*,clang-analyzer*,misc*,performance*,modernize*,"
+            "bugprone*,portability*,readability* "
+        "$$(git ls-files | grep 'cpp$$') -- -Isrc",
+))
+
+
 # Out-of-source build:
 VariantDir(build_dir, 'src')
 
 # All includes are relative to this "codebase root":
 env.Replace(CPPPATH=[Dir(build_dir)])  # Better than '#src'
-
 
 # Helper to sanely specify static lib dependencies, e.g.:
 #
