@@ -1,15 +1,46 @@
 # vim: ft=python
 env = DefaultEnvironment()
 
+# Useful warning flags:
+gcc_flags = [
+    '-Wnon-virtual-dtor',
+    '-Woverloaded-virtual',
+    '-Wcast-align',
+    '-Wsign-conversion',
+    '-Wnull-dereference',
+    '-Wlogical-op',
+    '-Wduplicated-cond',
+    '-Wmisleading-indentation',
+    '-Wuseless-cast',
+    #'-Wreturn-std-move',
+    #'-Wlifetime',
+]
+clang_flags = [
+    '-Wnon-virtual-dtor',
+    '-Woverloaded-virtual',
+    '-Wcast-align',
+    '-Wsign-conversion',
+    '-Wnull-dereference',
+    #'-Wlogical-op',
+    #'-Wduplicated-cond',
+    #'-Wmisleading-indentation',
+    #'-Wuseless-cast',
+    '-Wreturn-std-move',
+    #'-Wlifetime',
+]
+
 env.Append(
     CPPFLAGS = [
         '-std=c++17',
+
+        '-pedantic',
         '-Wall',
         '-Wextra',
-        #'-flto',
+
+        '-flto',
     ],
     LINKFLAGS = [
-        #'-flto',
+        '-flto',
     ],
 )
 
@@ -17,9 +48,9 @@ build_vars = Variables()
 build_vars.Add(
     EnumVariable(
         'mode',
-        allowed_values=['dbg', 'opt'],
+        allowed_values=['dbg', 'opt', 'dbg-clang', 'opt-clang'],
         default='dbg',
-        help='Build mode: opt or dbg'
+        help='Build mode to use (debug/optimized, gcc/clang)'
     )
 )
 build_vars.Update(env)
@@ -28,11 +59,22 @@ Help(build_vars.GenerateHelpText(env))
 
 if env['mode'] == 'opt':
     env.Append(CPPFLAGS = ['-O2'])
-    build_dir = 'build/opt'
-else:
+    env.Append(CPPFLAGS = gcc_flags)
+elif env['mode'] == 'opt-clang':
+    env.Replace(CXX = 'clang++')
+    env.Append(CPPFLAGS = ['-O2'])
+    env.Append(CPPFLAGS = clang_flags)
+elif env['mode'] == 'dbg':
     env.Append(CPPFLAGS = ['-g'], CPPDEFINES = ['DEBUG'])
-    build_dir = 'build/dbg'
+    env.Append(CPPFLAGS = gcc_flags)
+elif env['mode'] == 'dbg-clang':
+    env.Replace(CXX = 'clang++')
+    env.Append(CPPFLAGS = ['-g'], CPPDEFINES = ['DEBUG'])
+    env.Append(CPPFLAGS = clang_flags)
+else:
+    raise "Unexpected build mode"
 
+build_dir = 'build/' + env['mode']
 
 # Out-of-source build:
 VariantDir(build_dir, 'src')
